@@ -1,0 +1,26 @@
+name: create an HxS standard tarball
+
+on:
+  workflow_dispatch:
+
+jobs:
+  create:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: get hxsbootstrap
+        run: |
+          git clone --depth 1 https://git.sr.ht/~juanvel400/hxsbootstrap hxsbootstrap
+
+      - name: build a rootfs using hxsbootstrap
+        run: sudo hxsbootstrap/hxsbootstrap.sh -s standard hxs.standard-target
+
+      - name: package
+        run: tar --zstd -cf hxs.standard-26a2-x86_64.tar.zst -C hxs.standard-target
+
+      - name: upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: hxs.standard
+          path: hxs.standard-26a2-x86_64.tar.zst
