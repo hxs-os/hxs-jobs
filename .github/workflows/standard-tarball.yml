@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  create:
+  create-tarball:
     runs-on: ubuntu-latest
     steps:
       - name: get hxsbootstrap
@@ -14,8 +14,10 @@ jobs:
       - name: build a rootfs using hxsbootstrap
         run: sudo hxsbootstrap/hxsbootstrap.sh -s standard -d hxs.standard-target
 
+      - name: remove hxsbootstrap cache
+        run: sudo rm -r hxs.standard-target/var/cache/hxsbootstrap
       - name: package
-        run: sudo tar --zstd -cf hxs.standard-26a2-x86_64.tar.zst -C hxs.standard-target .
+        run: sudo tar --sort=name --mtime='2026-11-14' --zstd -cf hxs.standard-26a2-x86_64.tar.zst -C hxs.standard-target .
 
       - name: checksum
         run: sha256sum hxs.standard-26a2-x86_64.tar.zst > hxs.standard-26a2-x86_64.tar.zst.sha256
@@ -25,3 +27,8 @@ jobs:
         with:
           name: hxs.standard
           path: hxs.standard-26a2-x86_64.tar.zst*
+
+      - name: release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload 26a2 hxs.standard-26a2-x86_64.tar.zst* --clobber
