@@ -17,10 +17,13 @@ jobs:
         run: sudo hxsbootstrap/hxsbootstrap.sh -s standard -d hxs.standard-target
 
       - name: package
-        run: tar --zstd -cf hxs.standard-26a2-x86_64.tar.zst -C hxs.standard-target .
+        run: sudo tar --zstd -cf hxs.standard-26a2-x86_64.tar.zst -C hxs.standard-target .
+
+      - name: checksum
+        run: sha256sum hxs.standard-26a2-x86_64.tar.zst > hxs.standard-26a2-x86_64.tar.zst.sha256
 
       - name: upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: hxs.standard
-          path: hxs.standard-26a2-x86_64.tar.zst
+          path: hxs.standard-26a2-x86_64.tar.zst*
