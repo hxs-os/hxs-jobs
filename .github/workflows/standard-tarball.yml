@@ -14,7 +14,7 @@ jobs:
           git clone --depth 1 https://git.sr.ht/~juanvel400/hxsbootstrap hxsbootstrap
 
       - name: build a rootfs using hxsbootstrap
-        run: sudo hxsbootstrap/hxsbootstrap.sh -s standard hxs.standard-target
+        run: sudo hxsbootstrap/hxsbootstrap.sh -s standard -d hxs.standard-target
 
       - name: package
         run: tar --zstd -cf hxs.standard-26a2-x86_64.tar.zst -C hxs.standard-target
