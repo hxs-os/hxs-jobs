@@ -7,8 +7,6 @@ jobs:
   create:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
       - name: get hxsbootstrap
         run: |
           git clone --depth 1 https://git.sr.ht/~juanvel400/hxsbootstrap hxsbootstrap
