@@ -5,16 +5,19 @@ on:
 
 jobs:
   create-tarball:
+    permissions:
+      contents: write
+      packages: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
       - name: get hxsbootstrap
         run: |
           git clone --depth 1 https://git.sr.ht/~juanvel400/hxsbootstrap hxsbootstrap
 
       - name: build a rootfs using hxsbootstrap
-        run: sudo hxsbootstrap/hxsbootstrap.sh -s standard -d hxs.standard-target
+        run: |
+          sudo hxsbootstrap/hxsbootstrap.sh -s standard -d hxs.standard-target
+          sudo ln -sf dash hxs.standard-target/bin/sh
 
       - name: remove hxsbootstrap cache
         run: sudo rm -r hxs.standard-target/var/cache/hxsbootstrap
@@ -24,13 +27,21 @@ jobs:
       - name: checksum
         run: sha256sum hxs.standard-26a2-x86_64.tar.zst > hxs.standard-26a2-x86_64.tar.zst.sha256
 
+      - name: container image
+        run: |
+          zstd -dc hxs.standard-26a2-x86_64.tar.zst \
+            sudo podman import --change 'CMD ["/bin/sh"]' - hxs:26a2
+          sudo podman run --rm hxs:26a2 /bin/sh -c 'echo ok'
+
+      - name: push image
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "$TOKEN" | sudo podman login ghcr.io -u ${{ github.actor }} --password-stdin
+          sudo podman push hxs:26a2 ghcr.io/juanvel4000/hxs:26a2
+
       - name: upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: hxs.standard
           path: hxs.standard-26a2-x86_64.tar.zst*
-
-      - name: release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload 26a2 hxs.standard-26a2-x86_64.tar.zst* --clobber
