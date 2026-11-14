@@ -21,6 +21,7 @@ jobs:
 
       - name: remove hxsbootstrap cache
         run: sudo rm -r hxs.standard-target/var/cache/hxsbootstrap
+
       - name: package
         run: sudo tar --sort=name --mtime='2026-11-14' --zstd -cf hxs.standard-26a2-x86_64.tar.zst -C hxs.standard-target .
 
@@ -29,7 +30,7 @@ jobs:
 
       - name: container image
         run: |
-          zstd -dc hxs.standard-26a2-x86_64.tar.zst \
+          zstd -dc hxs.standard-26a2-x86_64.tar.zst | \
             sudo podman import --change 'CMD ["/bin/sh"]' - hxs:26a2
           sudo podman run --rm hxs:26a2 /bin/sh -c 'echo ok'
 
