@@ -16,33 +16,37 @@ jobs:
 
       - name: build a rootfs using hxsbootstrap
         run: |
-          sudo hxsbootstrap/hxsbootstrap.sh -s standard -d hxs.standard-target
+          sudo hxsbootstrap/hxsbootstrap.sh -s standard -d hxs.standard-target -v 26a3 -a x86_64 \
+            -m https://main.hxs.juanvel400.com/sets
+
           sudo ln -sf dash hxs.standard-target/bin/sh
+          echo "https://main.hxs.juanvel400.com/archive/26a3/x86_64/xpt.index" \
+            | sudo tee hxs.standard-target/etc/xpt.d/index
 
       - name: remove hxsbootstrap cache
         run: sudo rm -r hxs.standard-target/var/cache/hxsbootstrap
 
       - name: package
-        run: sudo tar --sort=name --mtime='2026-11-14' --zstd -cf hxs.standard-26a2-x86_64.tar.zst -C hxs.standard-target .
+        run: sudo tar --owner=0 --group=0 --sort=name --mtime='UTC 2026-11-14' --zstd -cf hxs.standard-26a3-x86_64.tar.zst -C hxs.standard-target .
 
       - name: checksum
-        run: sha256sum hxs.standard-26a2-x86_64.tar.zst > hxs.standard-26a2-x86_64.tar.zst.sha256
+        run: sha256sum hxs.standard-26a3-x86_64.tar.zst > hxs.standard-26a3-x86_64.tar.zst.sha256
 
       - name: container image
         run: |
-          zstd -dc hxs.standard-26a2-x86_64.tar.zst | \
-            sudo podman import --change 'CMD ["/bin/sh"]' - hxs:26a2
-          sudo podman run --rm hxs:26a2 /bin/sh -c 'echo ok'
+          zstd -dc hxs.standard-26a3-x86_64.tar.zst | \
+            sudo podman import --arch amd64 --os linux --change 'CMD ["/bin/sh"]' - hxs:26a3
+          sudo podman run --rm hxs:26a3 /bin/sh -c 'echo ok'
 
       - name: push image
         env:
           TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "$TOKEN" | sudo podman login ghcr.io -u ${{ github.actor }} --password-stdin
-          sudo podman push hxs:26a2 ghcr.io/juanvel4000/hxs:26a2
+          sudo podman push hxs:26a3 ghcr.io/juanvel4000/hxs:26a3
 
       - name: upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: hxs.standard
-          path: hxs.standard-26a2-x86_64.tar.zst*
+          path: hxs.standard-26a3-x86_64.tar.zst*
