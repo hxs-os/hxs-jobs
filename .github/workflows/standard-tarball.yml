@@ -1,4 +1,4 @@
-name: create an HxS standard tarball
+name: create HxS tarballs and containers
 
 on:
   workflow_dispatch:

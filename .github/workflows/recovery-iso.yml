@@ -1,0 +1,81 @@
+name: create an HxS Recovery Image
+
+on:
+  workflow_dispatch:
+
+jobs:
+  create-iso:
+    runs-on: ubuntu-latest
+    steps:
+      - name: install tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            grub-pc-bin grub-efi-amd64-bin xorriso mtools
+      - name: get hxsbootstrap
+        run: |
+          git clone --depth 1 https://git.sr.ht/~juanvel400/hxsbootstrap hxsbootstrap
+
+      - name: build a rootfs using hxsbootstrap
+        run: |
+          sudo hxsbootstrap/hxsbootstrap.sh \
+            -s gnu \
+            -d "hxs.recovery" \
+            -v 26a3 \
+            -S efi \
+            -a x86_64 \
+            -m https://main.hxs.juanvel400.com/sets
+
+          sudo ln -sf bash "hxs.recovery/bin/sh"
+
+          echo "https://main.hxs.juanvel400.com/archive/26a3/x86_64/xpt.index" \
+            | sudo tee "hxs.recovery/etc/xpt.d/index"
+
+      - name: configure adam(8)
+        run: |
+          cat << EOF | sudo tee hxs.recovery/etc/inittab
+          id:S:initdefault:
+          sh:S:respawn:/bin/sh
+          EOF
+
+          sudo ln -sf usr/sbin/adam ./hxs.recovery/init
+
+      - name: build an initramfs image
+        run: |
+          cd ./hxs.recovery
+          sudo find . -print0 | \
+          sudo cpio -0 -o -newc | \
+          sudo gzip > ../initramfs.cpio.gz
+
+      - name: download the kernel package
+        run: |
+          curl -fsSL -o linux-7.3.4.xpt https://main.hxs.juanvel400.com/x86_64/l/linux-7.3.4.xpt
+          sudo mkdir -p linux-pkg
+          sudo tar -xpf linux-7.3.4.xpt -C linux-pkg
+
+      - name: compose the ISO image
+        run: |
+          sudo mkdir -p ./iso.recovery/boot/grub
+          sudo cp ./initramfs.cpio.gz ./iso.recovery/boot/initramfs.cpio.gz
+          sudo cp ./linux-pkg/boot/vmlinuz-linux ./iso.recovery/boot/vmlinuz-linux
+
+          cat << 'EOF' | sudo tee ./iso.recovery/boot/grub/grub.cfg
+          set timeout=5
+
+          menuentry 'HxS 26a3 Recovery' --id=hxs-recovery {
+            echo 'Loading HxS 26a3 Recovery...'
+            linux /boot/vmlinuz-linux quiet
+            initrd /boot/initramfs.cpio.gz
+          }
+          EOF
+
+          sudo grub-mkrescue ./iso.recovery -o hxs.recovery-26a3-x86_64.iso
+          sudo sha256sum hxs.recovery-26a3-x86_64.iso | sudo tee hxs.recovery-26a3-x86_64.iso.sha256
+
+      - name: upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: hxs.recovery
+          path: |
+            hxs.recovery-26a3-x86_64.iso
+            hxs.recovery-26a3-x86_64.iso.sha256
