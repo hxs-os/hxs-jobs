@@ -57,7 +57,7 @@ jobs:
         run: |
           sudo mkdir -p ./iso.recovery/boot/grub
           sudo cp ./initramfs.cpio.gz ./iso.recovery/boot/initramfs.cpio.gz
-          sudo cp ./linux-pkg/boot/vmlinuz-linux ./iso.recovery/boot/vmlinuz-linux
+          sudo cp ./linux-pkg/boot/vmlinuz-linux-7.3.4-hxs ./iso.recovery/boot/vmlinuz-linux
 
           cat << 'EOF' | sudo tee ./iso.recovery/boot/grub/grub.cfg
           set timeout=5
