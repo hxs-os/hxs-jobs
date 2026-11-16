@@ -49,7 +49,7 @@ jobs:
 
       - name: download the kernel package
         run: |
-          curl -fsSL -o linux-7.3.4.xpt https://main.hxs.juanvel400.com/x86_64/l/linux-7.3.4.xpt
+          curl -fsSL -o linux-7.3.4.xpt https://main.hxs.juanvel400.com/x86_64/l/linux/linux-7.3.4.xpt
           sudo mkdir -p linux-pkg
           sudo tar -xpf linux-7.3.4.xpt -C linux-pkg
 
