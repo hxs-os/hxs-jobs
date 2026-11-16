@@ -29,7 +29,12 @@ jobs:
             -a x86_64 \
             -m https://main.hxs.juanvel400.com/sets
 
-          sudo ln -sf dash "hxs.$SET-target/bin/sh"
+          if [ "$SET" != "gnu" ]; then
+            sudo ln -sf dash "hxs.$SET-target/bin/sh"
+          else
+            sudo ln -sf bash "hxs.$SET-target/bin/sh"
+          fi
+
           echo "https://main.hxs.juanvel400.com/archive/26a3/x86_64/xpt.index" \
             | sudo tee "hxs.$SET-target/etc/xpt.d/index"
 
