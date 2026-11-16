@@ -44,7 +44,7 @@ jobs:
         run: |
           cd ./hxs.recovery
           sudo find . -print0 | \
-          sudo cpio -0 -o -newc | \
+          sudo cpio --null -o --format=newc | \
           sudo gzip > ../initramfs.cpio.gz
 
       - name: download the kernel package
