@@ -12,9 +12,9 @@ GitHub Actions workflows to build HxS images and tarballs.
 
 Creates a `.tar.zst` archive containing an `hxs.SET-26a3-x86_64` filesystem produced by `hxsbootstrap`.
 
-## create an HxS recovery image (`recovery-iso.yml`)
+## create an HxS live iso image (`live-iso.yml`)
 
-[![create an HxS Recovery Image](https://github.com/juanvel4000/hxs-jobs/actions/workflows/recovery-iso.yml/badge.svg)](https://github.com/juanvel4000/hxs-jobs/actions/workflows/recovery-iso.yml)
+[![create an HxS live iso image](https://github.com/juanvel4000/hxs-jobs/actions/workflows/live-iso.yml/badge.svg)](https://github.com/juanvel4000/hxs-jobs/actions/workflows/live-iso.yml)
 
 - **HxS Version**: `26a3`
 - **HxS Flavor**: `gnu`
@@ -22,4 +22,4 @@ Creates a `.tar.zst` archive containing an `hxs.SET-26a3-x86_64` filesystem prod
 
 _Subsets: `efi`_
 
-Creates an ISO designed as a recovery environment.
+Creates a Live bootable ISO image based on `hxs-gnu-26a3-x86_64`

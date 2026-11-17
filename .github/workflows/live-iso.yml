@@ -1,4 +1,4 @@
-name: create an HxS Recovery Image
+name: create an HxS live iso image
 
 on:
   workflow_dispatch:
@@ -20,29 +20,28 @@ jobs:
         run: |
           sudo hxsbootstrap/hxsbootstrap.sh \
             -s gnu \
-            -d "hxs.recovery" \
+            -d "hxs" \
             -v 26a3 \
             -S efi \
             -a x86_64 \
             -m https://main.hxs.juanvel400.com/sets
 
-          sudo ln -sf bash "hxs.recovery/bin/sh"
+          sudo ln -sf bash "hxs/bin/sh"
 
-          echo "https://main.hxs.juanvel400.com/archive/26a3/x86_64/xpt.index" \
-            | sudo tee "hxs.recovery/etc/xpt.d/index"
+          sudo rm -rf "hxs/var/cache/hxsbootstrap"
 
       - name: configure adam(8)
         run: |
-          cat << EOF | sudo tee hxs.recovery/etc/inittab
+          cat << 'EOF' | sudo tee hxs/etc/inittab
           id:S:initdefault:
           sh:S:respawn:/bin/sh
           EOF
 
-          sudo ln -sf usr/sbin/adam ./hxs.recovery/init
+          sudo ln -sf usr/sbin/adam ./hxs/init
 
       - name: build an initramfs image
         run: |
-          cd ./hxs.recovery
+          cd ./hxs
           sudo find . -print0 | \
           sudo cpio --null -o --format=newc | \
           sudo gzip > ../initramfs.cpio.gz
@@ -53,29 +52,31 @@ jobs:
           sudo mkdir -p linux-pkg
           sudo tar -xpf linux-7.3.4.xpt -C linux-pkg
 
+          sudo xpt -d ./hxs -if linux-7.3.4
+
       - name: compose the ISO image
         run: |
-          sudo mkdir -p ./iso.recovery/boot/grub
-          sudo cp ./initramfs.cpio.gz ./iso.recovery/boot/initramfs.cpio.gz
-          sudo cp ./linux-pkg/boot/vmlinuz-linux-7.3.4-hxs ./iso.recovery/boot/vmlinuz-linux
+          sudo mkdir -p ./iso/boot/grub
+          sudo cp ./initramfs.cpio.gz ./iso/boot/initramfs.cpio.gz
+          sudo cp ./linux-pkg/boot/vmlinuz-linux-7.3.4-hxs ./iso/boot/vmlinuz-linux
 
-          cat << 'EOF' | sudo tee ./iso.recovery/boot/grub/grub.cfg
+          cat << 'EOF' | sudo tee ./iso/boot/grub/grub.cfg
           set timeout=5
 
-          menuentry 'HxS 26a3 Recovery' --id=hxs-recovery {
-            echo 'Loading HxS 26a3 Recovery...'
-            linux /boot/vmlinuz-linux quiet
+          menuentry 'HxS 26a3 Live' --id=hxs-26a3 {
+            echo 'Loading HxS 26a3 Live...'
+            linux /boot/vmlinuz-linux
             initrd /boot/initramfs.cpio.gz
           }
           EOF
 
-          sudo grub-mkrescue ./iso.recovery -o hxs.recovery-26a3-x86_64.iso
-          sudo sha256sum hxs.recovery-26a3-x86_64.iso | sudo tee hxs.recovery-26a3-x86_64.iso.sha256
+          sudo grub-mkrescue ./iso -o hxs-26a3-x86_64.iso
+          sudo sha256sum hxs-26a3-x86_64.iso | sudo tee hxs-26a3-x86_64.iso.sha256
 
       - name: upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: hxs.recovery
+          name: hxs
           path: |
-            hxs.recovery-26a3-x86_64.iso
-            hxs.recovery-26a3-x86_64.iso.sha256
+            hxs-26a3-x86_64.iso
+            hxs-26a3-x86_64.iso.sha256
