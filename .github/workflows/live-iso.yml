@@ -50,7 +50,7 @@ jobs:
         run: |
           curl -fsSL -o xpt.static-0.13.2.xpt https://main.hxs.juanvel400.com/x86_64/x/xpt.static/xpt.static-0.13.2.xpt
           curl -fsSL -o linux-7.3.4.xpt https://main.hxs.juanvel400.com/x86_64/l/linux/linux-7.3.4.xpt
-          sudo mkdir -p linux-pkg xpt.static
+          sudo mkdir -p linux-pkg xpt-pkg
 
           sudo tar -xpf linux-7.3.4.xpt -C linux-pkg
           sudo tar -xpf xpt.static-0.13.2.xpt -C xpt-pkg
