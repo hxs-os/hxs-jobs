@@ -4,7 +4,7 @@ GitHub Actions workflows to build HxS images and tarballs.
 
 ## create an HxS standard tarball (`standard-tarball.yml`)
 
-[![create an HxS standard tarball](https://github.com/juanvel4000/hxs-jobs/actions/workflows/standard-tarball.yml/badge.svg)](https://github.com/juanvel4000/hxs-jobs/actions/workflows/standard-tarball.yml)
+[![create an HxS standard tarball](https://github.com/hxs-os/hxs-jobs/actions/workflows/standard-tarball.yml/badge.svg)](https://github.com/hxs-os/hxs-jobs/actions/workflows/standard-tarball.yml)
 
 - **HxS Version**: `26a3`
 - **HxS Flavor**: `standard`, `gnu`, `suckless`, `minimal`, `suckless-minimal`
@@ -14,7 +14,7 @@ Creates a `.tar.zst` archive containing an `hxs.SET-26a3-x86_64` filesystem prod
 
 ## create an HxS live iso image (`live-iso.yml`)
 
-[![create an HxS live iso image](https://github.com/juanvel4000/hxs-jobs/actions/workflows/live-iso.yml/badge.svg)](https://github.com/juanvel4000/hxs-jobs/actions/workflows/live-iso.yml)
+[![create an HxS live iso image](https://github.com/hxs-os/hxs-jobs/actions/workflows/live-iso.yml/badge.svg)](https://github.com/hxs-os/hxs-jobs/actions/workflows/live-iso.yml)
 
 - **HxS Version**: `26a3`
 - **HxS Flavor**: `gnu`

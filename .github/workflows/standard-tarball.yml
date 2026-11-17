@@ -58,7 +58,7 @@ jobs:
           TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "$TOKEN" | sudo podman login ghcr.io -u ${{ github.actor }} --password-stdin
-          sudo podman push "hxs.$SET:26a3" "ghcr.io/juanvel4000/hxs.$SET:26a3"
+          sudo podman push "hxs.$SET:26a3" "ghcr.io/hxs-os/hxs.$SET:26a3"
 
       - name: upload artifact
         uses: actions/upload-artifact@v4
