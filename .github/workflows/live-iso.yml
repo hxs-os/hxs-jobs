@@ -55,7 +55,7 @@ jobs:
           sudo tar -xpf linux-7.3.4.xpt -C linux-pkg
           sudo tar -xpf xpt.static-0.13.2.xpt -C xpt-pkg
 
-          sudo ./xpt-pkg/usr/bin/xpt -d ./hxs -if linux-7.3.4
+          sudo ./xpt-pkg/usr/bin/xpt -d ./hxs -if linux-7.3.4.xpt
 
       - name: compose the ISO image
         run: |

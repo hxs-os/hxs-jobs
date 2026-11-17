@@ -23,3 +23,7 @@ Creates a `.tar.zst` archive containing an `hxs.SET-26a3-x86_64` filesystem prod
 _Subsets: `efi`_
 
 Creates a Live bootable ISO image based on `hxs-gnu-26a3-x86_64`
+
+## License
+
+[0BSD](https://spdx.org/licenses/0BSD.html), see [LICENSE](LICENSE)
