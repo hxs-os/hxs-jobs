@@ -48,11 +48,14 @@ jobs:
 
       - name: download the kernel package
         run: |
+          curl -fsSL -o xpt.static-0.13.2.xpt https://main.hxs.juanvel400.com/x86_64/x/xpt.static/xpt.static-0.13.2.xpt
           curl -fsSL -o linux-7.3.4.xpt https://main.hxs.juanvel400.com/x86_64/l/linux/linux-7.3.4.xpt
-          sudo mkdir -p linux-pkg
-          sudo tar -xpf linux-7.3.4.xpt -C linux-pkg
+          sudo mkdir -p linux-pkg xpt.static
 
-          sudo xpt -d ./hxs -if linux-7.3.4
+          sudo tar -xpf linux-7.3.4.xpt -C linux-pkg
+          sudo tar -xpf xpt-0.13.2.xpt -C xpt-pkg
+
+          sudo ./xpt-pkg/usr/bin/xpt -d ./hxs -if linux-7.3.4
 
       - name: compose the ISO image
         run: |
