@@ -22,7 +22,7 @@ jobs:
             -s gnu \
             -d "hxs" \
             -v 26a3 \
-            -S efi \
+            -S efi installer \
             -a x86_64 \
             -m https://main.hxs.juanvel400.com/sets
 
@@ -34,7 +34,7 @@ jobs:
         run: |
           cat << 'EOF' | sudo tee hxs/etc/inittab
           id:S:initdefault:
-          sh:S:respawn:/bin/sh
+          sh:S:respawn:/usr/sbin/agetty -n -l /bin/sh tty1 linux
           EOF
 
           sudo ln -sf usr/sbin/adam ./hxs/init
