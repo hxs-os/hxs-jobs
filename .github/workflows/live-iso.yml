@@ -2,10 +2,30 @@ name: create an HxS live iso image
 
 on:
   workflow_dispatch:
+    inputs:
+      hxs.version:
+        description: the HxS version to use
+        required: true
+        type: string
+        default: 26a3
+      hxs.xpt.version:
+        description: the xpt version to use
+        required: true
+        type: string
+        default: 0.13.2
+      hxs.linux.version:
+        description: the linux kernel version to use
+        required: true
+        type: string
+        default: 7.3.4
 
 jobs:
   create-iso:
     runs-on: ubuntu-latest
+    env:
+      HXS_KERNEL_VERSION: 7.3.4
+      HXS_VERSION: ${{ inputs.version }}
+      HXS_XPT_VERSION: 0.13.2
     steps:
       - name: install tools
         run: |
@@ -21,8 +41,8 @@ jobs:
           sudo hxsbootstrap/hxsbootstrap.sh \
             -s gnu \
             -d "hxs" \
-            -v 26a3 \
-            -S efi installer \
+            -v "$HXS_VERSION" \
+            -S efi -S installer \
             -a x86_64 \
             -m https://main.hxs.juanvel400.com/sets
 
@@ -39,6 +59,17 @@ jobs:
 
           sudo ln -sf usr/sbin/adam ./hxs/init
 
+      - name: download the kernel package
+        run: |
+          curl -fsSL -o "xpt.static-$HXS_XPT_VERSION.xpt" "https://main.hxs.juanvel400.com/x86_64/x/xpt.static/xpt.static-$HXS_XPT_VERSION.xpt"
+          curl -fsSL -o "linux-$HXS_KERNEL_VERSION.xpt" "https://main.hxs.juanvel400.com/x86_64/l/linux/linux-$HXS_KERNEL_VERSION.xpt"
+          sudo mkdir -p linux-pkg xpt-pkg
+
+          sudo tar -xpf "linux-$HXS_KERNEL_VERSION.xpt" -C linux-pkg
+          sudo tar -xpf "xpt.static-$HXS-KERNEL_VERSION.xpt" -C xpt-pkg
+
+          sudo ./xpt-pkg/usr/bin/xpt -d ./hxs -if "linux-$HXS_KERNEL_VERSION.xpt"
+
       - name: build an initramfs image
         run: |
           cd ./hxs
@@ -46,40 +77,29 @@ jobs:
           sudo cpio --null -o --format=newc | \
           sudo gzip > ../initramfs.cpio.gz
 
-      - name: download the kernel package
-        run: |
-          curl -fsSL -o xpt.static-0.13.2.xpt https://main.hxs.juanvel400.com/x86_64/x/xpt.static/xpt.static-0.13.2.xpt
-          curl -fsSL -o linux-7.3.4.xpt https://main.hxs.juanvel400.com/x86_64/l/linux/linux-7.3.4.xpt
-          sudo mkdir -p linux-pkg xpt-pkg
-
-          sudo tar -xpf linux-7.3.4.xpt -C linux-pkg
-          sudo tar -xpf xpt.static-0.13.2.xpt -C xpt-pkg
-
-          sudo ./xpt-pkg/usr/bin/xpt -d ./hxs -if linux-7.3.4.xpt
-
       - name: compose the ISO image
         run: |
           sudo mkdir -p ./iso/boot/grub
           sudo cp ./initramfs.cpio.gz ./iso/boot/initramfs.cpio.gz
-          sudo cp ./linux-pkg/boot/vmlinuz-linux-7.3.4-hxs ./iso/boot/vmlinuz-linux
+          sudo cp "./linux-pkg/boot/vmlinuz-linux-$HXS_KERNEL_VERSION-hxs" ./iso/boot/vmlinuz-linux
 
-          cat << 'EOF' | sudo tee ./iso/boot/grub/grub.cfg
+          cat << EOF | sudo tee ./iso/boot/grub/grub.cfg
           set timeout=5
 
-          menuentry 'HxS 26a3 Live' --id=hxs-26a3 {
+          menuentry 'HxS $HXS_KERNEL_VERSION Live' --id=hxs-26a3 {
             echo 'Loading HxS 26a3 Live...'
             linux /boot/vmlinuz-linux
             initrd /boot/initramfs.cpio.gz
           }
           EOF
 
-          sudo grub-mkrescue ./iso -o hxs-26a3-x86_64.iso
-          sudo sha256sum hxs-26a3-x86_64.iso | sudo tee hxs-26a3-x86_64.iso.sha256
+          sudo grub-mkrescue ./iso -o "hxs-$HXS_VERSION-x86_64.iso"
+          sudo sha256sum "hxs-$HXS_VERSION-x86_64.iso" | sudo tee "hxs-$HXS_VERSION-x86_64.iso.sha256"
 
       - name: upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: hxs
           path: |
-            hxs-26a3-x86_64.iso
-            hxs-26a3-x86_64.iso.sha256
+            hxs-${{ inputs.version }}-x86_64.iso
+            hxs-${{ inputs.version}}-x86_64.iso.sha256

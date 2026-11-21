@@ -2,6 +2,12 @@ name: create HxS tarballs and containers
 
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        description: the HxS version to use
+        required: true
+        type: string
+        default: 26a3
 
 jobs:
   create-tarball:
@@ -15,6 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       SET: ${{ matrix.set }}
+      HXS_VERSION: ${{ inputs.version }}
     steps:
       - name: get hxsbootstrap
         run: |
@@ -25,7 +32,7 @@ jobs:
           sudo hxsbootstrap/hxsbootstrap.sh \
             -s "$SET" \
             -d "hxs.$SET-target" \
-            -v 26a3 \
+            -v $HXS_VERSION \
             -a x86_64 \
             -m https://main.hxs.juanvel400.com/sets
 
@@ -35,35 +42,35 @@ jobs:
             sudo ln -sf bash "hxs.$SET-target/bin/sh"
           fi
 
-          echo "https://main.hxs.juanvel400.com/archive/26a3/x86_64/xpt.index" \
+          echo "https://main.hxs.juanvel400.com/archive/$HXS_VERSION/x86_64/xpt.index" \
             | sudo tee "hxs.$SET-target/etc/xpt.d/index"
 
       - name: remove hxsbootstrap cache
         run: sudo rm -r "hxs.$SET-target/var/cache/hxsbootstrap"
 
       - name: package
-        run: sudo tar --numeric-owner --owner=0 --group=0 --sort=name --mtime='UTC 2026-11-14' --zstd -cf "hxs.$SET-26a3-x86_64.tar.zst" -C "hxs.$SET-target" .
+        run: sudo tar --numeric-owner --owner=0 --group=0 --sort=name --mtime='UTC 2026-11-14' --zstd -cf "hxs.$SET-$HXS_VERSION-x86_64.tar.zst" -C "hxs.$SET-target" .
 
       - name: checksum
-        run: sha256sum "hxs.$SET-26a3-x86_64.tar.zst" > "hxs.$SET-26a3-x86_64.tar.zst.sha256"
+        run: sha256sum "hxs.$SET-$HXS_VERSION-x86_64.tar.zst" > "hxs.$SET-$HXS_VERSION-x86_64.tar.zst.sha256"
 
       - name: container image
         run: |
-          zstd -dc "hxs.$SET-26a3-x86_64.tar.zst" | \
-            sudo podman import --arch amd64 --os linux --change 'CMD ["/bin/sh"]' - "hxs.$SET:26a3"
-          sudo podman run --rm "hxs.$SET:26a3" /bin/sh -c 'echo ok'
+          zstd -dc "hxs.$SET-$HXS_VERSION-x86_64.tar.zst" | \
+            sudo podman import --arch amd64 --os linux --change 'CMD ["/bin/sh"]' - "hxs.$SET:$HXS_VERSION"
+          sudo podman run --rm "hxs.$SET:$HXS_VERSION" /bin/sh -c 'echo ok'
 
       - name: push image
         env:
           TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "$TOKEN" | sudo podman login ghcr.io -u ${{ github.actor }} --password-stdin
-          sudo podman push "hxs.$SET:26a3" "ghcr.io/hxs-os/hxs.$SET:26a3"
+          sudo podman push "hxs.$SET:$HXS_VERSION" "ghcr.io/hxs-os/hxs.$SET:$HXS_VERSION"
 
       - name: upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: hxs.${{ matrix.set }}
           path: |
-            hxs.${{ matrix.set }}-26a3-x86_64.tar.zst
-            hxs.${{ matrix.set }}-26a3-x86_64.tar.zst.sha256
+            hxs.${{ matrix.set }}-${{ inputs.version }}-x86_64.tar.zst
+            hxs.${{ matrix.set }}-${{ inputs.version }}-x86_64.tar.zst.sha256

@@ -10,6 +10,8 @@ GitHub Actions workflows to build HxS images and tarballs.
 - **HxS Flavor**: `standard`, `gnu`, `suckless`, `minimal`, `suckless-minimal`
 - **HxS Architecture**: `x86_64`
 
+_Subsets: none_
+
 Creates a `.tar.zst` archive containing an `hxs.SET-26a3-x86_64` filesystem produced by `hxsbootstrap`.
 
 ## create an HxS live iso image (`live-iso.yml`)
@@ -20,7 +22,7 @@ Creates a `.tar.zst` archive containing an `hxs.SET-26a3-x86_64` filesystem prod
 - **HxS Flavor**: `gnu`
 - **HxS Architecture**: `x86_64`
 
-_Subsets: `efi`_
+_Subsets: `efi`, `installer`_
 
 Creates a Live bootable ISO image based on `hxs-gnu-26a3-x86_64`
 
