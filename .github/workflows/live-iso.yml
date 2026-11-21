@@ -31,7 +31,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            grub-pc-bin grub-efi-amd64-bin xorriso mtools
+            grub-pc-bin grub-efi-amd64-bin xorriso mtools cpio
       - name: get hxsbootstrap
         run: |
           git clone --depth 1 https://git.sr.ht/~juanvel400/hxsbootstrap hxsbootstrap
@@ -55,6 +55,7 @@ jobs:
           cat << 'EOF' | sudo tee hxs/etc/inittab
           id:S:initdefault:
           sh:S:respawn:/usr/sbin/agetty -n -l /bin/sh tty1 linux
+          dhcp:S2345:respawn:/usr/sbin/dhcpcd -B
           EOF
 
           sudo ln -sf usr/sbin/adam ./hxs/init
@@ -66,7 +67,7 @@ jobs:
           sudo mkdir -p linux-pkg xpt-pkg
 
           sudo tar -xpf "linux-$HXS_KERNEL_VERSION.xpt" -C linux-pkg
-          sudo tar -xpf "xpt.static-$HXS-KERNEL_VERSION.xpt" -C xpt-pkg
+          sudo tar -xpf "xpt.static-$HXS_XPT_VERSION.xpt" -C xpt-pkg
 
           sudo ./xpt-pkg/usr/bin/xpt -d ./hxs -if "linux-$HXS_KERNEL_VERSION.xpt"
 
@@ -86,20 +87,20 @@ jobs:
           cat << EOF | sudo tee ./iso/boot/grub/grub.cfg
           set timeout=5
 
-          menuentry 'HxS $HXS_KERNEL_VERSION Live' --id=hxs-26a3 {
-            echo 'Loading HxS 26a3 Live...'
-            linux /boot/vmlinuz-linux
+          menuentry 'HxS $HXS_KERNEL_VERSION Live' --id=hxs-live {
+            echo 'Loading HxS $HXS_VERSION Live...'
+            linux /boot/vmlinuz-linux quiet
             initrd /boot/initramfs.cpio.gz
           }
           EOF
 
-          sudo grub-mkrescue ./iso -o "hxs-$HXS_VERSION-x86_64.iso"
-          sudo sha256sum "hxs-$HXS_VERSION-x86_64.iso" | sudo tee "hxs-$HXS_VERSION-x86_64.iso.sha256"
+          sudo grub-mkrescue ./iso -o "hxs.live-$HXS_VERSION-x86_64.iso"
+          sudo sha256sum "hxs.live-$HXS_VERSION-x86_64.iso" | sudo tee "hxs.live-$HXS_VERSION-x86_64.iso.sha256"
 
       - name: upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: hxs
           path: |
-            hxs-${{ inputs.version }}-x86_64.iso
-            hxs-${{ inputs.version}}-x86_64.iso.sha256
+            hxs.live-${{ inputs.hxs-version }}-x86_64.iso
+            hxs.live-${{ inputs.hxs-version}}-x86_64.iso.sha256
