@@ -55,7 +55,6 @@ jobs:
           cat << 'EOF' | sudo tee hxs/etc/inittab
           id:S:initdefault:
           sh:S:respawn:/usr/sbin/agetty -n -l /bin/sh tty1 linux
-          dhcp:S2345:respawn:/usr/sbin/dhcpcd -B
           EOF
 
           sudo ln -sf usr/sbin/adam ./hxs/init
@@ -100,7 +99,7 @@ jobs:
       - name: upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: hxs
+          name: hxs.live
           path: |
             hxs.live-${{ inputs.hxs-version }}-x86_64.iso
             hxs.live-${{ inputs.hxs-version}}-x86_64.iso.sha256
