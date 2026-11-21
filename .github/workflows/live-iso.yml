@@ -3,17 +3,17 @@ name: create an HxS live iso image
 on:
   workflow_dispatch:
     inputs:
-      hxs.version:
+      hxs-version:
         description: the HxS version to use
         required: true
         type: string
         default: 26a3
-      hxs.xpt.version:
+      hxs-xpt-version:
         description: the xpt version to use
         required: true
         type: string
         default: 0.13.2
-      hxs.linux.version:
+      hxs-linux-version:
         description: the linux kernel version to use
         required: true
         type: string
@@ -23,9 +23,9 @@ jobs:
   create-iso:
     runs-on: ubuntu-latest
     env:
-      HXS_KERNEL_VERSION: 7.3.4
-      HXS_VERSION: ${{ inputs.version }}
-      HXS_XPT_VERSION: 0.13.2
+      HXS_KERNEL_VERSION: ${{ inputs.hxs-linux-version }}
+      HXS_VERSION: ${{ inputs.hxs-version }}
+      HXS_XPT_VERSION: ${{ inputs.hxs-xpt-version }}
     steps:
       - name: install tools
         run: |
