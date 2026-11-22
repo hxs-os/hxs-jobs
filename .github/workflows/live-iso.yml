@@ -54,7 +54,8 @@ jobs:
         run: |
           cat << 'EOF' | sudo tee hxs/etc/inittab
           id:S:initdefault:
-          sh:S:respawn:/usr/sbin/agetty -o '-s /bin/bash' -J -a root tty1 linux
+          tty1:S:respawn:/usr/bin/setsid -c /usr/sbin/agetty -J -a root tty1 linux
+          dhcp:S:respawn:/usr/sbin/dhcpcd -B
           EOF
 
           echo "hxs" | sudo tee hxs/etc/hostname
