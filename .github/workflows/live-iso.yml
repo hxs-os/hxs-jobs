@@ -54,8 +54,12 @@ jobs:
         run: |
           cat << 'EOF' | sudo tee hxs/etc/inittab
           id:S:initdefault:
-          sh:S:respawn:/usr/sbin/agetty -n -l /bin/sh tty1 linux
+          sh:S:respawn:/usr/sbin/agetty -a root tty1 linux
           EOF
+
+          echo "hxs" >hxs/etc/hostname
+
+          echo "https://main.hxs.juanvel400.com/archive/26a3/x86_64" >hxs/etc/xpt.d/index
 
           sudo ln -sf usr/sbin/adam ./hxs/init
 
@@ -86,7 +90,7 @@ jobs:
           cat << EOF | sudo tee ./iso/boot/grub/grub.cfg
           set timeout=5
 
-          menuentry 'HxS $HXS_KERNEL_VERSION Live' --id=hxs-live {
+          menuentry 'HxS $HXS_VERSION Live' --id=hxs-live {
             echo 'Loading HxS $HXS_VERSION Live...'
             linux /boot/vmlinuz-linux quiet
             initrd /boot/initramfs.cpio.gz
